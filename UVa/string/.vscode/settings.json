@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "regex": "cpp",
+        "iostream": "cpp",
+        "ostream": "cpp",
+        "string": "cpp",
+        "map": "cpp",
+        "__functional_03": "cpp",
+        "__string": "cpp",
+        "deque": "cpp",
+        "forward_list": "cpp",
+        "functional": "cpp",
+        "list": "cpp",
+        "system_error": "cpp",
+        "vector": "cpp"
+    }
+}

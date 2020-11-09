@@ -1,0 +1,215 @@
+use biller_scoring;
+
+ALTER TABLE biller_scoring.report_rc_intervals_history MODIFY `field` varchar(100) DEFAULT NULL;
+
+ALTER TABLE biller_scoring.weight_config_category ADD COLUMN `updated_by` int;
+ALTER TABLE biller_scoring.weight_config_category_history ADD COLUMN `updated_by` int;
+
+
+CREATE OR REPLACE TRIGGER `weight_config_category_ai` AFTER INSERT ON `weight_config_category` FOR EACH ROW
+INSERT INTO biller_scoring.weight_config_category_history
+(category_id,
+category,
+success_weight,
+latency_weight,
+margin_weight,
+priority_weight,
+target_weight,
+updated_by)
+(
+SELECT 
+category_id,
+category,
+success_weight,
+latency_weight,
+margin_weight,
+priority_weight,
+target_weight,
+updated_by
+FROM biller_scoring.weight_config_category WHERE id = NEW.id
+);
+
+CREATE OR REPLACE TRIGGER `weight_config_category_au` AFTER UPDATE ON `weight_config_category` FOR EACH ROW
+INSERT INTO biller_scoring.weight_config_category_history
+(category_id,
+category,
+success_weight,
+latency_weight,
+margin_weight,
+priority_weight,
+target_weight,
+updated_by)
+(
+SELECT 
+category_id,
+category,
+success_weight,
+latency_weight,
+margin_weight,
+priority_weight,
+target_weight,
+updated_by
+FROM biller_scoring.weight_config_category WHERE id = NEW.id
+);
+
+ALTER TABLE biller_scoring.weight_config_category_history MODIFY success_weight decimal(10,2);
+ALTER TABLE biller_scoring.weight_config_category_history MODIFY latency_weight decimal(10,2);
+ALTER TABLE biller_scoring.weight_config_category_history MODIFY margin_weight decimal(10,2);
+ALTER TABLE biller_scoring.weight_config_category_history MODIFY priority_weight decimal(10,2);
+ALTER TABLE biller_scoring.weight_config_category_history MODIFY target_weight decimal(10,2);
+
+ALTER TABLE biller_scoring.weight_config_partner ADD COLUMN updated_by int;
+ALTER TABLE biller_scoring.weight_config_partner_history ADD COLUMN partner_id int;
+ALTER TABLE biller_scoring.weight_config_partner_history ADD COLUMN updated_by int;
+
+CREATE OR REPLACE TRIGGER weigh_config_partner_ai 
+AFTER INSERT ON weight_config_partner
+FOR EACH ROW
+INSERT INTO biller_scoring.weight_config_partner_history
+(category_id, 
+category,
+partner_id,
+success_weight, 
+latency_weight, 
+priority_weight, 
+margin_weight, 
+target_weight, 
+created_at, 
+updated_at, 
+updated_by)
+(
+SELECT 
+category_id, 
+category,
+partner_id,
+success_weight, 
+latency_weight, 
+priority_weight, 
+margin_weight, 
+target_weight, 
+created_at, 
+updated_at, 
+updated_by
+FROM biller_scoring.weight_config_partner WHERE id = NEW.id
+);
+
+CREATE OR REPLACE TRIGGER weigh_config_partner_au
+AFTER UPDATE ON weight_config_partner
+FOR EACH ROW
+INSERT INTO biller_scoring.weight_config_partner_history
+(category_id, 
+category,
+partner_id,
+success_weight, 
+latency_weight, 
+priority_weight, 
+margin_weight, 
+target_weight, 
+created_at, 
+updated_at, 
+updated_by)
+(
+SELECT 
+category_id, 
+category,
+partner_id,
+success_weight, 
+latency_weight, 
+priority_weight, 
+margin_weight, 
+target_weight, 
+created_at, 
+updated_at, 
+updated_by
+FROM biller_scoring.weight_config_partner WHERE id = NEW.id
+);
+
+ALTER TABLE biller_scoring.weight_config_partner_history MODIFY success_weight decimal(10,2);
+ALTER TABLE biller_scoring.weight_config_partner_history MODIFY latency_weight decimal(10,2);
+ALTER TABLE biller_scoring.weight_config_partner_history MODIFY margin_weight decimal(10,2);
+ALTER TABLE biller_scoring.weight_config_partner_history MODIFY priority_weight decimal(10,2);
+ALTER TABLE biller_scoring.weight_config_partner_history MODIFY target_weight decimal(10,2);
+
+ALTER TABLE biller_scoring.category_product ADD COLUMN updated_by int;
+ALTER TABLE biller_scoring.category_product_history ADD COLUMN updated_by int;
+
+CREATE OR REPLACE TRIGGER `category_product_ai` AFTER INSERT ON `category_product` FOR EACH ROW
+INSERT INTO biller_scoring.category_product_history
+(`product_id`, `category_id`, created_at, updated_at, updated_by)
+(
+SELECT `product_id`, `category_id`, created_at, updated_at, updated_by
+FROM biller_scoring.category_product WHERE id = NEW.id
+);
+
+CREATE OR REPLACE TRIGGER `category_product_au` AFTER UPDATE ON `category_product` FOR EACH ROW
+INSERT INTO biller_scoring.category_product_history
+(`product_id`, `category_id`, created_at, updated_at, updated_by)
+(
+SELECT `product_id`, `category_id`, created_at, updated_at, updated_by
+FROM biller_scoring.category_product WHERE id = NEW.id
+);
+
+CREATE OR REPLACE VIEW `biller_scoring`.`vw_category_product` AS
+select
+    `cp`.`id` AS `id`,
+    `cp`.`product_id` AS `product_id`,
+    `product`.`label` AS `product_name`,
+    `cp`.`category_id` AS `category_id`,
+    `category`.`category` AS `category_name`,
+    `product_types`.`id` AS `product_type_id`,
+    `product_types`.`label` AS `product_type_name`,
+    `operator`.`id` AS `operator_id`,
+    `operator`.`label` AS `operator_name`,
+    `cp`.`created_at` AS `created_at`,
+    `cp`.`updated_at` AS `updated_at`,
+    cp.updated_by AS updated_by,
+    u.username as username,
+    u.`rolename` as `rolename`
+from
+    `biller_scoring`.`category_product` `cp`
+left join `biller_scoring`.`kraken-to-biller_scoring-products` `product` on
+    `cp`.`product_id` = `product`.`id`
+left join `biller_scoring`.`kraken-to-biller_scoring-product_types` `product_types` on
+    `product`.`type_id` = `product_types`.`id`
+left join `biller_scoring`.`weight_config_category` `category` on
+    `category`.`category_id` = `cp`.`category_id`
+left join `biller_scoring`.`kraken-to-biller_scoring-operator` `operator` on
+    `product`.`operator_id` = `operator`.`id`
+left join biller_scoring.`kraken-to-biller_scoring-user_roles` u on
+	cp.updated_by = u.id
+where
+    `product`.`deleted_at` is null;
+    
+CREATE OR REPLACE VIEW `biller_scoring`.`vw_category_product_history` AS
+select
+    `cp`.`id` AS `id`,
+    `cp`.`product_id` AS `product_id`,
+    `product`.`label` AS `product_name`,
+    `cp`.`category_id` AS `category_id`,
+    `category`.`category` AS `category_name`,
+    `product_types`.`id` AS `product_type_id`,
+    `product_types`.`label` AS `product_type_name`,
+    `operator`.`id` AS `operator_id`,
+    `operator`.`label` AS `operator_name`,
+    `cp`.`created_at` AS `created_at`,
+    `cp`.`updated_at` AS `updated_at`,
+    cp.updated_by AS updated_by,
+    u.username as username,
+    u.`rolename` as `rolename`
+from
+    `biller_scoring`.`category_product_history` `cp`
+left join `biller_scoring`.`kraken-to-biller_scoring-products` `product` on
+    `cp`.`product_id` = `product`.`id`
+left join `biller_scoring`.`kraken-to-biller_scoring-product_types` `product_types` on
+    `product`.`type_id` = `product_types`.`id`
+left join `biller_scoring`.`weight_config_category` `category` on
+    `category`.`category_id` = `cp`.`category_id`
+left join `biller_scoring`.`kraken-to-biller_scoring-operator` `operator` on
+    `product`.`operator_id` = `operator`.`id`
+left join biller_scoring.`kraken-to-biller_scoring-user_roles` u on
+	cp.updated_by = u.id
+where
+    `product`.`deleted_at` is null;
+    
+   
+ALTER TABLE biller_scoring.`kraken-to-biller_scoring-user_roles` RENAME COLUMN username TO username;

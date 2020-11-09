@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "tuple": "cpp",
+        "string": "cpp",
+        "ostream": "cpp",
+        "iosfwd": "cpp",
+        "vector": "cpp",
+        "iostream": "cpp",
+        "algorithm": "cpp",
+        "map": "cpp",
+        "set": "cpp"
+    },
+    "python.pythonPath": "venv/bin/python3.7"
+}
