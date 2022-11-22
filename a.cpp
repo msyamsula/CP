@@ -82,30 +82,70 @@ void inputArray2(ll *ptr, ll n){
     }
 }
 
-bool isPalindrome(string s){
-    ll n = s.size();
-    for(ll i=0; i<=(n-1)/2; i++){
-        if (s[i] != s[n-1-i]) return false;
+void solve(){
+    ll L,N; scanf("%lld %lld\n", &L, &N);
+    ll D; char C; 
+    scanf("%lld %c", &D, &C);
+    // printf("%lld %c\n", D, C);
+    ll pos = D%L;
+    char ld = C;
+    ll counter = D/L;
+    // printf("%lld %lld %lld %c\n", D, counter, pos, ld);
+    for(ll i=0; i<N-1; i++){
+        scanf("%lld %c", &D, &C);
+        // printf("%lld %c\n", D, C);
+        ll delta;
+        ll add;
+        if (C == 'C'){
+            delta = (pos+(D%L)) >= L ? 1 : 0;
+            pos = (pos+D)%L;
+            add = (D/L) + delta;
+            if (ld != C){
+                add = max(0ll, add-1);
+            }
+            if ((D/L) + delta >= 1) ld = C;
+        } else if (C == 'A') {
+            delta = (pos-(D%L)) <= 0 ? 1 : 0;
+            pos = (pos-D)%L;
+            pos = (pos<0) ? pos+L : pos;
+            add = (D/L) + delta;
+            if (ld != C){
+                add = max(0ll, add-1);
+            }
+            if ((D/L) + delta >= 1){
+                // printf("goes here\n");
+                ld = C;
+            }
+            // printf("add: %lld\n", add);
+        }
+
+        counter += add;
+
+        // if (ld == C){
+        // } else {
+        //     add = max(0ll, add-1);
+        //     counter += add;
+        // }
+
+        // if (add > 0) ld = C;
+        // printf("%lld %lld %lld %c\n", D, counter, pos, ld);
+
     }
 
-    return true;
-}
-
-void solve(){
-    ll n; scanf("%lld\n", &n);
-    char s[1005]; scanf("%s", &s);
-    string S(s);
+    printf("%lld\n", counter);
 }
 
 
 int main(){
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
-    // int tc; cin>>tc;
     int tc; scanf("%lld", &tc);
     for(ll i=0; i<tc; i++){
-        // printf("Case #%lld: ", i+1);
+        printf("Case #%lld: ", i+1);
         solve();
     }
+
+    // ll a = (-1)%5;
+    // printf("%lld\n",a);
     return 0;
 }
