@@ -165,193 +165,102 @@ private:
     vl stSum, stMin;
     vl lazy;
     ll n;
+ll onePos(ll r, ll c, ll R, ll C){
+    return r*C+c;
+}
 
-    void push(ll p, ll i, ll j){
-        if (lazy[p] == 0) return;
+pair<ll, ll> twoPos(ll n, ll R, ll C){
+    pair<ll, ll> ans;
+    ans.first = n/C;
+    ans.second = n%C;
 
-        // printf("\n lazy[%lld]: %lld", p, lazy[p]);
-        stSum[p] += (j-i+1)*lazy[p];
-        stMin[p] += lazy[p];
-        ll left = 2*p, right = 2*p + 1;
+    return ans;
+}
 
-        if (i != j){
-            lazy[left] += lazy[p];
-            lazy[right] += lazy[p];
-        }
-
-        lazy[p] = 0;
-        // printf("\n pushing %lld, %lld", p, stSum[p]);
-    }
-
-    void build(ll p, ll i, ll j){
-        if (i==j){
-            stSum[p] = stMin[p] = parr[i];
-            return;
-        }
-
-        ll left = 2*p, right = 2*p+1;
-        ll mid = (i+j)/2;
-        build(left, i, mid);
-        build(right, mid+1, j);
-
-        stSum[p] = stSum[left] + stSum[right];
-        stMin[p] = min(stMin[left],stMin[right]);
-
-        // printf("\n after build %lld, result: %lld", p, stSum[p]);
-    }
-
-    ll rsq(ll p, ll i, ll j, ll x, ll y){
-        push(p, i, j);
-        if (j<x || i>y) return 0;
-        if (x<=i && j<=y) return stSum[p];
-
-        ll left = 2*p, right = 2*p + 1, mid = (i+j)/2;
-        return rsq(left, i, mid, x, y) + rsq(right, mid+1, j, x, y);
-    }
-
-    ll rmq(ll p, ll i, ll j, ll x, ll y){
-        push(p, i, j);
-        if (j<x || i>y) return INF;
-        if (x<=i && j<=y) return stMin[p];
-
-        ll left = 2*p, right = 2*p + 1, mid = (i+j)/2;
-        return min(rmq(left, i, mid, x, y), rmq(right, mid+1, j, x, y));
-    }
-
-    void update(ll p, ll i, ll j, ll x, ll y, ll val){
-        push(p, i, j);
-        if (j<x || i>y) return;
-        if (x<=i && j<=y){
-            lazy[p] += val;
-            push(p, i, j);
-            return;
-        }
-
-        ll left = 2*p, right = 2*p + 1, mid = (i+j)/2;
-        update(left, i, mid, x, y, val);
-        update(right, mid+1, j, x, y, val);
-
-        stSum[p] = stSum[left] + stSum[right];
-        stMin[p] = min(stMin[left], stMin[right]);
-    }
-public:
-    ST(vl arr){
-        parr = arr;
-        n = arr.size();
-        stSum.resize(4*(n), 0);
-        stMin = stSum;
-        lazy = stMin;
-        build(1, 0, n-1);
-    }
-
-    ll rmq(ll x, ll y){
-        return rmq(1, 0, n-1, x, y);
-    }
-
-    ll rsq(ll x, ll y){
-        return rsq(1, 0, n-1, x, y);
-    }
-
-    void update(ll x, ll y, ll val){
-        return update(1, 0, n-1, x, y, val);
-    }
-
-    void showSTsum(){
-        printf("\n");
-        for(ll i=0; i<stSum.size(); i++){
-            printf(" %lld", stSum[i]);
-        }
-    }
-
-};
 
 void solve(){
-    ll n; scanf("%lld\n", &n);
+    ll n,r,c,sr,sc; scanf("%lld %lld %lld %lld %lld", &n, &r, &c, &sr, &sc);
+    // string a; cin>>a;
+    sr--; sc--;
+    char ss[ll(5e4+5)]; scanf("%s", ss);
+    string s(ss);
 
-    vl arr(n,0);
-    vl ps1 = arr, ps2 = arr;
+    unordered_map<ll, ll> top, right, bot, left;
 
-    for(ll i=0; i<n; i++){
-        scanf("%lld", &arr[i]);
-        ps1[i] = ( (i-1<0) ? 0 : ps1[i-1])+arr[i];
-        ps2[i] = ( (i-1<0) ? 0 : ps2[i-1]) + ps1[i];
-    }
+    ll cp = onePos(sr, sc, r, c);
 
-    // printf("\n");
-    // for(ll i=0; i<ps1.size(); i++){
-    //     printf(" %lld", ps1[i]);
-    // }
+    top[cp] = cp-c;
+    bot[cp] = cp+c;
+    left[cp] = cp-1;
+    right[cp] = cp+1;
 
-    ST mst = ST(ps1);
+    // top[cp] = (sr-1 < 0) ? -1 : onePos(sr-1, sc, r, c);
+    // right[cp] = (sc+1 >= c) ? -1 : onePos(sr, sc+1, r, c);
+    // bot[cp] = (sr+1 >= r) ? -1 : onePos(sr+1, sc, r, c);
+    // left[cp] = (sc-1 < 0) ? -1 : onePos(sr, sc-1, r, c);
 
-    ll i=0, j=0;
-    vvl happyRange;
-    while(i<n && j<n){
-        while(arr[i]<0) i++;
 
-        j=i;
+    for(ll i=0; i<s.size(); i++){
+        char ch = s[i];
+        ll pp = cp;
 
-        while(j<n && ps1[j]- ( (i-1 < 0) ? 0 : ps1[i-1]) >= 0) j++;
+        if (ch == 'N'){
+            cp = top[cp];
+            top[cp] = cp-c;
+            (right.find(cp) == right.end()) ? right[cp] = cp+1 : right[cp] = right[cp];
+            bot[cp] = bot[pp];
+            (left.find(cp) == left.end()) ? left[cp] = cp-1 : left[cp] = left[cp];
+        } else if (ch == 'E'){
+            cp = right[cp];
+            // (top.find(cp) == top.end()) ? printf("goes here\n") : printf("b\n");
+            (top.find(cp) == top.end()) ? top[cp] = cp-c : top[cp] = top[cp];
+            // cout << top[cp] << ' ' << cp << ' ' << c << ' ' << cp-c << ' ' << endl;
+            right[cp] = cp+1;
+            (bot.find(cp) == bot.end()) ? bot[cp] = cp+c : bot[cp] = bot[cp];
+            left[cp] = left[pp];
+            // cout << 
+        } else if (ch == 'S'){
+            cp = bot[cp];
+            bot[cp] = cp+c;
+            top[cp] = top[pp];
+            (right.find(cp) == right.end()) ? right[cp] = cp+1 : right[cp] = right[cp];
+            (left.find(cp) == left.end()) ? left[cp] = cp-1 : left[cp] = left[cp];
+        } else if (ch == 'W') {
+            cp = left[cp];
+            left[cp] = cp-1;
 
-        happyRange.push_back({i,j-1});
-        i=j;
-    }
-
-    ll ans = 0;
-    for(ll i=0; i<happyRange.size(); i++){
-        // printf("\n %lld %lld", happyRange[i][0], happyRange[i][1]);
-        ll ii = happyRange[i][0], jj = happyRange[i][1];
-        ans += ps2[jj] - ( (ii-1<0) ? 0 : ps2[ii-1]);
-        ans -= (jj-ii+1)*( (ii-1<0) ? 0 : ps1[ii-1]);
-        // ans += mst.rsq(ii, jj) - (jj-ii+1)*(ps1[ii-1]);
-
-        for(ll k=ii+1; k<=jj; k++){
-            ll prevPs = (k-1<0) ? 0 : ps1[k-1];
-            // printf("\n prevPs: %lld", prevPs);
-
-            mst.update(k, jj, -prevPs);
-
-            if (mst.rmq(k, jj) < 0){
-            } else {
-                ll add = ps2[jj] - ps2[k-1];
-                add -= (jj-k+1)*( (k-1<0) ? 0 : ps1[k-1]);
-                ans += add;
-                // printf("\n%lld %lld: happy, add: %lld, rmq: %lld", k, jj, add, mst.rmq(k, jj));
-            }
-
-            mst.update(k, jj, prevPs);
+            right[cp] = right[pp];
+            (top.find(cp) == top.end()) ? top[cp] = cp-c : top[cp] = top[cp];
+            // if (top.find(27) != top.end()) cout << "top27 " << top[27] << endl;
+            (bot.find(cp) == bot.end()) ? bot[cp] = cp+c : bot[cp] = bot[cp];
         }
+
+        bot[top[cp]] = bot[cp];
+        left[right[cp]] = left[cp];
+        top[bot[cp]] = top[cp];
+        right[left[cp]] = right[cp];
+        // pair<ll, ll> ans = twoPos(cp, r, c);
+        // cout  << pp << "->" << cp << endl;
+        // cout << "at: " << ans.first+1 << ' ' << ans.second+1 << endl;
+        // cout << "urbl: " << top[cp] << ' ' << right[cp] << ' ' << bot[cp] << ' ' << left[cp] << endl;
     }
 
-    // printf("\n");
-    printf("%lld\n", ans);
+    pair<ll, ll> ans = twoPos(cp, r, c); r++; c++;
+    printf("%lld %lld\n", ans.first+1, ans.second+1);
 
-    // mst.showSTsum();
-
-    // printf("\n%lld", mst.rmq(0,2)); // -1
-    // printf("\n%lld", mst.rmq(0,4)); // -1
-    // printf("\n%lld", mst.rmq(0,3)); // -1
-    // printf("\n%lld", mst.rmq(1,2)); // -1
-    // printf("\n%lld", mst.rmq(3,4)); // 0
-    // mst.update(1,3,2);
-    // printf("\n%lld", mst.rsq(1,3)); // 7 x
-    // printf("\n%lld", mst.rmq(1,3)); // 1
-    // printf("\n%lld", mst.rmq(1,1)); // 1
-    // printf("\n%lld", mst.rmq(2,2)); // 4
-    // printf("\n%lld", mst.rmq(3,3)); // 2
-    // printf("\n%lld", mst.rsq(1,3)); // 2
-
-
-
-
+    // cout << n << r << c << sr << sc << a << endl;
+    // printf("%s\n", a.c_str());
+    // cout << "hello" << endl;
+    // printf("%s\n", s.c_str());
 }
 
 
 int main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+    // ios_base::sync_with_stdio(false);
+    // cin.tie(NULL);
     // int tc; cin>>tc;
     int tc; scanf("%lld", &tc);
+    // printf("%lld\n", tc);
     for(ll i=0; i<tc; i++){
         printf("Case #%lld: ", i+1);
         solve();
