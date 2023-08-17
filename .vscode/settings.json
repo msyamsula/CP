@@ -22,5 +22,6 @@
         "list": "cpp",
         "queue": "cpp",
         "functional": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

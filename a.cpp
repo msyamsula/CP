@@ -82,70 +82,94 @@ void inputArray2(ll *ptr, ll n){
     }
 }
 
-void solve(){
-    ll L,N; scanf("%lld %lld\n", &L, &N);
-    ll D; char C; 
-    scanf("%lld %c", &D, &C);
-    // printf("%lld %c\n", D, C);
-    ll pos = D%L;
-    char ld = C;
-    ll counter = D/L;
-    // printf("%lld %lld %lld %c\n", D, counter, pos, ld);
-    for(ll i=0; i<N-1; i++){
-        scanf("%lld %c", &D, &C);
-        // printf("%lld %c\n", D, C);
-        ll delta;
-        ll add;
-        if (C == 'C'){
-            delta = (pos+(D%L)) >= L ? 1 : 0;
-            pos = (pos+D)%L;
-            add = (D/L) + delta;
-            if (ld != C){
-                add = max(0ll, add-1);
-            }
-            if ((D/L) + delta >= 1) ld = C;
-        } else if (C == 'A') {
-            delta = (pos-(D%L)) <= 0 ? 1 : 0;
-            pos = (pos-D)%L;
-            pos = (pos<0) ? pos+L : pos;
-            add = (D/L) + delta;
-            if (ld != C){
-                add = max(0ll, add-1);
-            }
-            if ((D/L) + delta >= 1){
-                // printf("goes here\n");
-                ld = C;
-            }
-            // printf("add: %lld\n", add);
-        }
+void dfs(vvl &g, map<pair<ll, ll>, ll> &e, vvl &t, vl &visited, ll u, pair<ll, ll> &state, vector<pair<ll, ll>> &st){
+    visited[u] = 1;
 
-        counter += add;
+    bitset<10> tmpb(state.first);
+    bitset<10> cs;
+    for(ll type : t[u]){
+        cs[type] = 1;
+    }
+    bitset<10> ns; ns = cs | tmpb;
+    state.first = ns.to_ullong();
+    // printf("\nvisited %lld", u);
+    cout << endl << "visited " << u << ' ' << bitset<10>(state.first);
 
-        // if (ld == C){
-        // } else {
-        //     add = max(0ll, add-1);
-        //     counter += add;
-        // }
-
-        // if (add > 0) ld = C;
-        // printf("%lld %lld %lld %c\n", D, counter, pos, ld);
-
+    if (u == g.size()-1){
+        // st.insert(state);
+        st.push_back(state);
+        cout << endl << bitset<10>(state.first);
+        visited[u] = 0;
+        state.first = tmpb.to_ullong();
+        return;
     }
 
-    printf("%lld\n", counter);
+    for(ll v : g[u]){
+        if (visited[v] == 1) continue;
+        state.second += e[{u,v}];
+        dfs(g,e,t,visited, v, state, st);
+        state.second -= e[{u,v}];
+    }
+
+    visited[u] = 0;
+    state.first = tmpb.to_ullong();
+}
+
+void solve(){
+    ll n,m,k; scanf("%lld %lld %lld", &n, &m, &k);
+    vvl t; t.resize(n);
+    for(ll i=0; i<n; i++){
+        ll x; scanf("%lld", &x);
+        for(ll j=0; j<x; j++){
+            ll type; scanf("%lld", &type); type--;
+            t[i].push_back(type);
+        }
+    }
+
+    vvl g; g.resize(n);
+    map<pair<ll,ll>, ll> e;
+    for(ll i=0; i<m; i++){
+        ll u,v,w; scanf("%lld %lld %lld", &u, &v,&w), u--; v--;
+        g[u].push_back(v);
+        g[v].push_back(u);
+        e[{u,v}] = w;
+        e[{v,u}] = w;
+    }
+
+    vector<pair<ll, ll>> st;
+    pair<ll, ll> state;
+    vl visited; visited.assign(n, 0);
+
+    dfs(g,e,t,visited,0,state,st);
+
+    for(pair<ll,ll> p : st){
+        cout << bitset<10>(p.first) << ' ' << p.second << endl;
+    }
+
+    ll ans = INF;
+    for(ll i=0; i<st.size(); i++){
+
+        for(ll j=i; j<st.size(); j++){
+            bitset<10> a(st[i].first), b(st[j].first);
+            bitset<10> c = a | b;
+            if (c.to_ullong() == (1ll<<k)-1){
+                ans = min(ans, max(st[i].second, st[j].second));
+            }
+        }
+    }
+
+    printf("%lld\n", ans);
 }
 
 
 int main(){
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
-    int tc; scanf("%lld", &tc);
-    for(ll i=0; i<tc; i++){
-        printf("Case #%lld: ", i+1);
+    // int tc; cin>>tc;
+    // int tc; scanf("%lld", &tc);
+    // for(ll i=0; i<tc; i++){
+    //     // printf("Case #%lld: ", i+1);
         solve();
-    }
-
-    // ll a = (-1)%5;
-    // printf("%lld\n",a);
+    // }
     return 0;
 }
