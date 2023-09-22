@@ -206,7 +206,8 @@ void solve(){
 
         if (ch == 'N'){
             cp = top[cp];
-            top[cp] = cp-c;
+            // top[cp] = cp-c;
+            (top.find(cp) == top.end()) ? top[cp] = cp-c : top[cp] = top[cp];
             (right.find(cp) == right.end()) ? right[cp] = cp+1 : right[cp] = right[cp];
             bot[cp] = bot[pp];
             (left.find(cp) == left.end()) ? left[cp] = cp-1 : left[cp] = left[cp];
@@ -215,20 +216,22 @@ void solve(){
             // (top.find(cp) == top.end()) ? printf("goes here\n") : printf("b\n");
             (top.find(cp) == top.end()) ? top[cp] = cp-c : top[cp] = top[cp];
             // cout << top[cp] << ' ' << cp << ' ' << c << ' ' << cp-c << ' ' << endl;
-            right[cp] = cp+1;
+            (right.find(cp) == right.end()) ? right[cp] = cp+1 : right[cp] = right[cp];
+            // right[cp] = cp+1;
             (bot.find(cp) == bot.end()) ? bot[cp] = cp+c : bot[cp] = bot[cp];
             left[cp] = left[pp];
             // cout << 
         } else if (ch == 'S'){
             cp = bot[cp];
-            bot[cp] = cp+c;
+            // bot[cp] = cp+c;
+            (bot.find(cp) == bot.end()) ? bot[cp] = cp+c : bot[cp] = bot[cp];
             top[cp] = top[pp];
             (right.find(cp) == right.end()) ? right[cp] = cp+1 : right[cp] = right[cp];
             (left.find(cp) == left.end()) ? left[cp] = cp-1 : left[cp] = left[cp];
         } else if (ch == 'W') {
             cp = left[cp];
-            left[cp] = cp-1;
-
+            // left[cp] = cp-1;
+            (left.find(cp) == left.end()) ? left[cp] = cp-c : left[cp] = left[cp];
             right[cp] = right[pp];
             (top.find(cp) == top.end()) ? top[cp] = cp-c : top[cp] = top[cp];
             // if (top.find(27) != top.end()) cout << "top27 " << top[27] << endl;

@@ -111,4 +111,20 @@ int main(){
     // initialize(3, 10);
     // show(dp);
     cout << binExp(3, 20) << endl;
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    // int tc; cin>>tc;
+    // for(ll i=0; i<tc; i++){
+    //     cout << "Case #" << i+1 <<": ";
+    //     solve();
+    // }
+
+    int *a, *b; a = b = nullptr;
+    int val = 8, val2 = 8;
+    a = &val;
+    b = &val2;
+    // *a = 8;
+    // *b = 8;
+    cout << a << ' ' << b << ' ' << (a == 0) << endl;
+    return 0;
 }
