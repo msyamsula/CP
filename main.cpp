@@ -82,70 +82,33 @@ void inputArray2(ll *ptr, ll n){
     }
 }
 
-vector<long long> primes;
-bitset<(long long)1e7> bs;
-long long limit = 5e6;
-
-void sieve(){
-    bs.set();
-    bs[0] = bs[1] = 0;
-    for (long long i=2; i<=limit; i++){
-        if (bs[i]){
-            for(long long j=2*i; j<=limit; j+=i) bs[j] = 0;
-            primes.push_back(i);
-        }
-    }
-}
-
-int countPrimes(int n) {
-    long long left = 0, right = primes.size()-1;
-    while(left < right){
-        long long mid = (left + right)/2;
-        
-        bool y;
-        if (primes[mid] < (long long)n){
-            left = mid+1;
-            y = true;
-        } else {
-            right = mid;
-            y = false;
+long long binExp(long long a, long long p){
+    long long r = 1;
+    while(p>0){
+        int b = p%2;
+        if (b == 1){
+            r *= a;
         }
         
-        
-        if (left == right) {
-            if (y) return mid+1;
-            return mid;
-        }
+        a*=a;
+        p>>=1;
     }
-    
-    return 0;
+    return r;
 }
 
-void solve(){
-    for (auto x : primes){
-        cout << x << endl;
-    }
-
-    int a = countPrimes(3);
-    cout << a << endl;
-}
 
 
 int main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    // int tc; cin>>tc;
-    int tc; scanf("%lld", &tc);
-    sieve();
-    for(ll i=0; i<tc; i++){
-        // printf("Case #%lld: ", i+1);
-        solve();
-
-        bitset<10> a = bitset<10>(93);
-        bitset<10> b = bitset<10>(73);
-        cout << bitset<10>(93) << endl;
-        cout << bitset<10>(73) << endl;
-        cout << bitset<10>(a^b) << endl;
-    }
-    return 0;
+    // ios_base::sync_with_stdio(false);
+    // cin.tie(NULL);
+    // // int tc; cin>>tc;
+    // int tc; scanf("%lld", &tc);
+    // for(ll i=0; i<tc; i++){
+    //     // printf("Case #%lld: ", i+1);
+    //     solve();
+    // }
+    // return 0;
+    // initialize(3, 10);
+    // show(dp);
+    cout << binExp(3, 20) << endl;
 }
